@@ -1,0 +1,32 @@
+# Env / secrets
+.env
+.env.local
+.env.example
+
+# VCS
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Docs / dev metadata
+README.md
+.claude/
+
+# Local Dockerfile artifacts
+Dockerfile
+.dockerignore

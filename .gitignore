@@ -1,0 +1,20 @@
+# Local env
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Storage runtime files
+storage/uploads/*
+storage/outputs/*
+storage/avatars/*
+test_file/
+!storage/uploads/.gitkeep
+!storage/outputs/.gitkeep
+!storage/avatars/.gitkeep
