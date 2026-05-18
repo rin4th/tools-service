@@ -39,115 +39,99 @@
   }
 </script>
 
-<svelte:head><title>Split — Atelier Tools</title></svelte:head>
+<svelte:head><title>Split PDF — Voltage</title></svelte:head>
 
-<ToolShell num="02" title="Split.">
+<ToolShell eyebrow="Tools / PDF" title="Split a PDF.">
   {#snippet lede()}
-    Excerpt a precise range from a PDF &mdash; from page <em>x</em> to page
-    <em>y</em>, no more, no less. The remainder stays untouched.
+    Extract a precise range from any PDF — pages <em>x</em> through <em>y</em>, no more, no less.
   {/snippet}
 
   <form onsubmit={onSubmit} novalidate>
     <Dropzone
       bind:files
       accept="application/pdf"
-      label="Place the document here"
-      sublabel="— a single PDF —"
+      label="Drop a PDF here"
+      sublabel="single file"
     />
 
-    <fieldset class="range">
-      <legend class="range__legend">
-        <span class="section-num">No. 02 &middot; Page range</span>
-      </legend>
-
-      <div class="range__row">
-        <label class="field">
-          <span class="field__label">From page</span>
-          <input
-            class="field__input"
-            type="number"
-            min="1"
-            bind:value={startPage}
-            required
-          />
-        </label>
-
-        <span class="range__dash" aria-hidden="true">&mdash;</span>
-
-        <label class="field">
-          <span class="field__label">Through page</span>
-          <input
-            class="field__input"
-            type="number"
-            min="1"
-            bind:value={endPage}
-            required
-          />
-        </label>
-      </div>
-    </fieldset>
+    <div class="range">
+      <label class="field">
+        <span class="field__label">From page</span>
+        <input class="field__input" type="number" min="1" bind:value={startPage} required />
+      </label>
+      <span class="range__sep" aria-hidden="true">→</span>
+      <label class="field">
+        <span class="field__label">To page</span>
+        <input class="field__input" type="number" min="1" bind:value={endPage} required />
+      </label>
+    </div>
 
     {#if error}
-      <p class="notice notice--err" style="margin-top: 18px;">{error}</p>
+      <p class="notice notice--err" style="margin-top: 16px;">{error}</p>
+    {/if}
+    {#if lastFilename}
+      <p class="notice notice--ok" style="margin-top: 16px;">
+        Generated {lastFilename} — download started automatically.
+      </p>
     {/if}
 
     <div class="actions">
-      <button class="btn btn--accent" type="submit" disabled={busy || !files.length}>
-        {busy ? 'Excerpting…' : 'Excerpt range'}
-        <span aria-hidden="true">&rarr;</span>
+      <button class="btn" type="submit" disabled={busy || !files.length}>
+        {#if busy}
+          <span class="spinner"></span>
+          Extracting
+        {:else}
+          Extract range
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+        {/if}
       </button>
-      {#if lastFilename}
-        <span class="lnk lnk--ok">✓ Issued {lastFilename}</span>
+      {#if files.length}
+        <span class="meta">pages {startPage}–{endPage}</span>
       {/if}
     </div>
   </form>
 
   {#snippet side()}
-    <p>
-      The range is inclusive on both ends. To take only one page, set
-      <em>x</em> equal to <em>y</em>. The original document is never altered.
-    </p>
+    <h3 style="font-size: 0.92rem; font-weight: 500; margin-bottom: 10px; color: var(--fg);">How it works</h3>
+    <p style="margin: 0 0 12px;">The range is inclusive on both ends. To take a single page, set <em>from</em> equal to <em>to</em>.</p>
+    <p class="hint" style="margin: 0;">The original document is never modified.</p>
   {/snippet}
 </ToolShell>
 
 <style>
   .range {
-    margin: 28px 0 0;
-    padding: 22px 0 0;
-    border: 0;
-    border-top: 1px solid var(--rule-strong);
-  }
-
-  .range__legend { padding: 0; }
-
-  .range__row {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: end;
-    gap: 18px;
-    max-width: 520px;
-    margin-top: 18px;
+    gap: 16px;
+    margin-top: 22px;
+    max-width: 460px;
   }
-
-  .range__dash {
-    font-family: var(--serif);
-    font-size: 1.6rem;
-    color: var(--ink-mute);
-    padding-bottom: 8px;
+  .range__sep {
+    font-family: var(--mono);
+    color: var(--fg-mute);
+    padding-bottom: 12px;
   }
-
   .actions {
-    margin-top: 28px;
+    margin-top: 24px;
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 16px;
     flex-wrap: wrap;
   }
-  .lnk {
+  .meta {
     font-family: var(--mono);
-    font-size: 0.74rem;
-    letter-spacing: 0.1em;
-    color: var(--ink-mute);
+    font-size: 0.78rem;
+    color: var(--fg-mute);
   }
-  .lnk--ok { color: var(--good); }
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #0a0a0c40;
+    border-top-color: var(--bg);
+    animation: spin 700ms linear infinite;
+  }
+  .hint { color: var(--fg-mute); font-size: 0.86rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>

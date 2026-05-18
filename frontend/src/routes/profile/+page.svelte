@@ -55,7 +55,7 @@
       avatarFile = null;
       if (avatarPreview) URL.revokeObjectURL(avatarPreview);
       avatarPreview = null;
-      avatarOk = 'Portrait updated.';
+      avatarOk = 'Avatar updated.';
     } catch (err) {
       avatarError = err.message || 'Failed to upload avatar';
     } finally {
@@ -94,26 +94,23 @@
   );
 </script>
 
-<svelte:head><title>Profile — Atelier Tools</title></svelte:head>
+<svelte:head><title>Account — Voltage</title></svelte:head>
 
 <article class="profile">
   <header class="profile__head">
-    <p class="section-num rise rise-1">§ 04 &mdash; Account</p>
-    <h1 class="profile__title rise rise-2">
-      <em>{$user?.username ?? '·'}</em>'s ledger.
+    <p class="eyebrow rise rise-1">Account</p>
+    <h1 class="display profile__title rise rise-2">
+      Hello, <span class="profile__accent">{$user?.username ?? '·'}</span>.
     </h1>
-    <p class="profile__lede rise rise-3">
-      Settle your portrait and key. The rest of the workshop will follow your
-      example.
-    </p>
-    <div class="rule rise rise-3" style="margin-top: 24px;"></div>
+    <p class="profile__lede rise rise-3">Manage your portrait and credentials.</p>
   </header>
 
-  <div class="profile__body">
-    <section class="block rise rise-4">
+  <div class="grid">
+    <section class="block rise rise-3">
       <header class="block__head">
-        <span class="section-num">No. 01</span>
-        <h2 class="block__title">Portrait.</h2>
+        <span class="block__num">01</span>
+        <h2 class="block__title">Avatar</h2>
+        <span class="block__hint">JPEG · PNG · WebP, up to 2 MB</span>
       </header>
 
       <div class="portrait">
@@ -125,79 +122,69 @@
               {$user?.username?.[0]?.toUpperCase() ?? '·'}
             </span>
           {/if}
-          <span class="portrait__caption">{$user?.username ?? ''}</span>
         </div>
 
         <form class="portrait__form" onsubmit={uploadAvatar}>
           <label class="upload">
-            <input type="file" accept="image/jpeg,image/png,image/webp" onchange={pickAvatar} />
-            <span class="upload__btn">Choose a likeness</span>
-            <span class="upload__hint">JPEG, PNG, or WebP &middot; up to 2 MB</span>
+            <input type="file" accept="image/jpeg,image/png,image/webp" onchange={pickAvatar} hidden />
+            <span class="upload__btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+              Choose image
+            </span>
           </label>
 
           {#if avatarFile}
-            <p class="picked">
-              <em>{avatarFile.name}</em> chosen &mdash; ready to submit.
-            </p>
+            <p class="picked">{avatarFile.name} ready to upload</p>
           {/if}
 
           {#if avatarError}<p class="notice notice--err">{avatarError}</p>{/if}
           {#if avatarOk}<p class="notice notice--ok">{avatarOk}</p>{/if}
 
-          <button class="btn btn--accent" type="submit" disabled={!avatarFile || avatarBusy}>
-            {avatarBusy ? 'Sending…' : 'Submit portrait'}
+          <button class="btn" type="submit" disabled={!avatarFile || avatarBusy}>
+            {#if avatarBusy}
+              <span class="spinner"></span>
+              Uploading
+            {:else}
+              Save avatar
+            {/if}
           </button>
         </form>
       </div>
     </section>
 
-    <section class="block rise rise-5">
+    <section class="block rise rise-4">
       <header class="block__head">
-        <span class="section-num">No. 02</span>
-        <h2 class="block__title">Key.</h2>
+        <span class="block__num">02</span>
+        <h2 class="block__title">Password</h2>
+        <span class="block__hint">Use at least 6 characters</span>
       </header>
 
       <form class="pwd" onsubmit={submitPassword}>
         <label class="field">
           <span class="field__label">Current password</span>
-          <input
-            class="field__input"
-            type="password"
-            autocomplete="current-password"
-            bind:value={currentPwd}
-            required
-          />
+          <input class="field__input" type="password" autocomplete="current-password" bind:value={currentPwd} required />
         </label>
 
         <label class="field">
           <span class="field__label">New password</span>
-          <input
-            class="field__input"
-            type="password"
-            autocomplete="new-password"
-            bind:value={newPwd}
-            required
-            minlength="6"
-          />
+          <input class="field__input" type="password" autocomplete="new-password" bind:value={newPwd} required minlength="6" />
         </label>
 
         <label class="field">
           <span class="field__label">Confirm new password</span>
-          <input
-            class="field__input"
-            type="password"
-            autocomplete="new-password"
-            bind:value={confirmPwd}
-            required
-            minlength="6"
-          />
+          <input class="field__input" type="password" autocomplete="new-password" bind:value={confirmPwd} required minlength="6" />
         </label>
 
         {#if pwdError}<p class="notice notice--err">{pwdError}</p>{/if}
         {#if pwdOk}<p class="notice notice--ok">{pwdOk}</p>{/if}
 
-        <button class="btn" type="submit" disabled={pwdBusy}>
-          {pwdBusy ? 'Reforging…' : 'Replace key'}
+        <button class="btn btn--ghost" type="submit" disabled={pwdBusy}>
+          {#if pwdBusy}
+            <span class="spinner spinner--ghost"></span>
+            Saving
+          {:else}
+            Change password
+          {/if}
         </button>
       </form>
     </section>
@@ -205,128 +192,158 @@
 </article>
 
 <style>
-  .profile { display: grid; gap: 32px; }
+  .profile { display: grid; gap: 40px; }
 
   .profile__title {
-    font-family: var(--serif);
     font-size: clamp(2.4rem, 5vw, 3.6rem);
-    line-height: 1.05;
-    letter-spacing: -0.02em;
-    margin: 14px 0 18px;
+    margin: 14px 0 14px;
   }
 
-  .profile__title em {
+  .profile__accent {
+    background: linear-gradient(120deg, var(--volt) 0%, var(--volt-2) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
     font-style: italic;
-    color: var(--accent);
-    font-variation-settings: 'opsz' 144, 'SOFT' 80;
+    font-family: var(--serif);
+    font-weight: 400;
   }
 
   .profile__lede {
-    font-family: var(--serif);
-    font-style: italic;
-    color: var(--ink-2);
-    font-size: 1.1rem;
+    color: var(--fg-2);
+    font-size: 1.05rem;
     max-width: 56ch;
+    margin: 0;
   }
 
-  .profile__body {
+  .grid {
     display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: clamp(24px, 4vw, 64px);
-    align-items: start;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
   }
 
-  .block { display: grid; gap: 22px; }
-  .block__head { display: grid; gap: 6px; }
+  .block {
+    padding: 28px;
+    background: linear-gradient(180deg, var(--surface) 0%, var(--bg-elev) 100%);
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-2);
+  }
+
+  .block__head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .block__num {
+    grid-row: 1 / 3;
+    align-self: center;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: var(--surface-3);
+    border: 1px solid var(--line-2);
+    color: var(--volt);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+  }
+
   .block__title {
-    font-family: var(--serif);
-    font-size: 1.6rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+
+  .block__hint {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    color: var(--fg-mute);
   }
 
   .portrait {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 28px;
+    gap: 22px;
     align-items: start;
   }
 
   .portrait__frame {
-    width: 180px;
-    background: var(--paper-2);
-    border: 1px solid var(--rule-strong);
-    padding: 12px 12px 14px;
-    box-shadow: var(--shadow-paper);
-    display: grid;
-    gap: 8px;
-    transform: rotate(-1deg);
+    width: 130px;
+    height: 130px;
+    border-radius: var(--r-2);
+    border: 1px solid var(--line-2);
+    background: var(--surface-2);
+    overflow: hidden;
+    position: relative;
   }
 
   .portrait__frame img {
     width: 100%;
-    aspect-ratio: 1 / 1;
+    height: 100%;
     object-fit: cover;
-    background: var(--paper-3);
   }
 
   .portrait__placeholder {
     display: grid;
     place-items: center;
-    aspect-ratio: 1 / 1;
-    background: var(--ink);
-    color: var(--paper);
-    font-family: var(--serif);
-    font-style: italic;
-    font-size: 4.5rem;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--volt) 0%, var(--plum) 100%);
+    color: var(--bg);
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 3rem;
   }
 
-  .portrait__caption {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--ink-mute);
-    text-align: center;
-  }
+  .portrait__form { display: grid; gap: 12px; }
 
-  .portrait__form { display: grid; gap: 16px; align-content: start; }
-
-  .upload { display: grid; gap: 6px; cursor: pointer; }
-  .upload input { display: none; }
+  .upload { cursor: pointer; }
   .upload__btn {
     display: inline-flex;
     align-items: center;
-    height: 40px;
-    padding: 0 18px;
-    border: 1px solid var(--rule-strong);
-    border-radius: var(--rad);
-    font-family: var(--mono);
-    font-size: 0.74rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--ink);
-    background: var(--paper);
+    gap: 8px;
+    height: 36px;
+    padding: 0 14px;
+    background: var(--surface);
+    border: 1px solid var(--line-3);
+    border-radius: var(--r-1);
+    font-size: 0.85rem;
+    color: var(--fg);
+    transition: background 160ms var(--ease), border-color 160ms var(--ease);
     width: max-content;
-    transition: background 160ms ease, color 160ms ease;
   }
-  .upload:hover .upload__btn { background: var(--ink); color: var(--paper); }
-  .upload__hint {
-    font-family: var(--serif);
-    font-style: italic;
-    color: var(--ink-mute);
-    font-size: 0.95rem;
+  .upload:hover .upload__btn {
+    background: var(--surface-2);
+    border-color: var(--volt);
   }
 
   .picked {
     margin: 0;
-    font-family: var(--serif);
-    font-style: italic;
-    color: var(--ink-2);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--fg-mute);
   }
 
-  .pwd { display: grid; gap: 22px; max-width: 480px; }
+  .pwd { display: grid; gap: 16px; }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #0a0a0c40;
+    border-top-color: var(--bg);
+    animation: spin 700ms linear infinite;
+  }
+  .spinner--ghost {
+    border-color: var(--line-3);
+    border-top-color: var(--fg);
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   @media (max-width: 900px) {
-    .profile__body { grid-template-columns: 1fr; }
-    .portrait { grid-template-columns: 1fr; }
+    .grid { grid-template-columns: 1fr; }
   }
 </style>

@@ -8,6 +8,7 @@
 
   let avatarUrl = $state(null);
   let mounted = $state(false);
+  let menuOpen = $state(false);
 
   onMount(async () => {
     mounted = true;
@@ -34,57 +35,62 @@
   }
 
   let { children } = $props();
+
+  const navItems = [
+    { href: '/tools/pdf/merge', label: 'Merge' },
+    { href: '/tools/pdf/split', label: 'Split' },
+    { href: '/tools/pdf/image-to-pdf', label: 'Images' }
+  ];
 </script>
 
 <div class="shell">
-  <header class="masthead">
-    <div class="masthead__bar">
-      <div class="masthead__mark">
-        <a href="/" class="mark">
-          <span class="mark__symbol" aria-hidden="true">A</span>
-          <span class="mark__name">Atelier</span>
-          <span class="mark__sep">/</span>
-          <span class="mark__sub">Tools</span>
-        </a>
-      </div>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a href="/" class="brand">
+        <span class="brand__logo" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <rect x="2" y="2" width="20" height="20" rx="6" fill="var(--volt)"/>
+            <path d="M11 5L6 13h4.5l-1.5 6 7.5-10h-4.5l1.5-4z" fill="var(--bg)"/>
+          </svg>
+        </span>
+        <span class="brand__name">Voltage</span>
+        <span class="brand__badge">v0.1</span>
+      </a>
 
-      <nav class="masthead__nav" aria-label="Primary">
-        <a href="/tools/pdf/merge" class:active={$page.url.pathname.startsWith('/tools/pdf/merge')}>
-          <span class="num">i.</span> Merge
-        </a>
-        <a href="/tools/pdf/split" class:active={$page.url.pathname.startsWith('/tools/pdf/split')}>
-          <span class="num">ii.</span> Split
-        </a>
-        <a href="/tools/pdf/image-to-pdf" class:active={$page.url.pathname.startsWith('/tools/pdf/image-to-pdf')}>
-          <span class="num">iii.</span> Images
-        </a>
+      <nav class="nav" aria-label="Primary">
+        {#each navItems as item}
+          <a href={item.href} class:active={$page.url.pathname.startsWith(item.href)}>
+            {item.label}
+          </a>
+        {/each}
       </nav>
 
-      <div class="masthead__account">
+      <div class="topbar__right">
         {#if mounted && $token && $user}
-          <a href="/profile" class="account">
-            <span class="account__name">{$user.username}</span>
-            <span class="account__avatar" aria-hidden="true">
+          <button class="user" onclick={() => (menuOpen = !menuOpen)} aria-haspopup="menu" aria-expanded={menuOpen}>
+            <span class="user__avatar" aria-hidden="true">
               {#if avatarUrl}
                 <img src={avatarUrl} alt="" />
               {:else}
                 <span>{$user.username?.[0]?.toUpperCase() ?? '·'}</span>
               {/if}
             </span>
-          </a>
-          <button class="lnk" onclick={onLogout}>Sign out</button>
+            <span class="user__name">{$user.username}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.6;">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          {#if menuOpen}
+            <div class="menu" role="menu" onmouseleave={() => (menuOpen = false)}>
+              <a href="/profile" class="menu__item" onclick={() => (menuOpen = false)}>Profile</a>
+              <div class="menu__divider"></div>
+              <button class="menu__item menu__item--del" onclick={onLogout}>Sign out</button>
+            </div>
+          {/if}
         {:else if mounted}
-          <a href="/login" class="lnk lnk--strong">Sign in &rarr;</a>
+          <a href="/login" class="btn btn--ghost">Sign in</a>
         {/if}
       </div>
-    </div>
-
-    <div class="masthead__rule" aria-hidden="true">
-      <span class="masthead__date">
-        {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}
-      </span>
-      <span class="masthead__rule-line"></span>
-      <span class="masthead__edition">Vol. I &middot; Edition 01</span>
     </div>
   </header>
 
@@ -94,19 +100,19 @@
 
   <footer class="foot">
     <div class="foot__inner">
-      <span class="foot__col">
-        <span class="eyebrow">Colophon</span>
-        <p class="foot__text">
-          Set in <em>Fraunces</em> &amp; <em>IBM Plex</em>. Printed on cream &mdash; rendered in pixels.
-        </p>
+      <span class="foot__brand">
+        <span class="brand__logo" aria-hidden="true" style="width: 14px; height: 14px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <rect x="2" y="2" width="20" height="20" rx="6" fill="var(--volt)"/>
+            <path d="M11 5L6 13h4.5l-1.5 6 7.5-10h-4.5l1.5-4z" fill="var(--bg)"/>
+          </svg>
+        </span>
+        Voltage Tools — self-hosted utilities
       </span>
-      <span class="foot__col foot__col--mid">
-        <span class="eyebrow">Local</span>
-        <p class="foot__text">localhost:3000 &middot; api: /api/*</p>
-      </span>
-      <span class="foot__col foot__col--end">
-        <span class="eyebrow">&copy;</span>
-        <p class="foot__text">{new Date().getFullYear()} &mdash; an open workshop.</p>
+      <span class="foot__meta">
+        <span>Local · localhost:3000</span>
+        <span class="foot__dot">·</span>
+        <span>API /api/*</span>
       </span>
     </div>
   </footer>
@@ -119,211 +125,214 @@
     flex-direction: column;
   }
 
-  .masthead {
-    padding: 22px clamp(20px, 4vw, 56px) 0;
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    background: #0a0a0cb8;
+    border-bottom: 1px solid var(--line);
   }
 
-  .masthead__bar {
+  .topbar__inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 14px clamp(20px, 4vw, 40px);
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 24px;
   }
 
-  .mark {
+  .brand {
     display: inline-flex;
-    align-items: baseline;
+    align-items: center;
     gap: 10px;
-    color: var(--ink);
+    color: var(--fg);
+  }
+  .brand:hover { color: var(--fg); }
+
+  .brand__logo {
+    display: grid;
+    place-items: center;
   }
 
-  .mark:hover {
-    color: var(--ink);
-    text-decoration: none;
-  }
-
-  .mark__symbol {
-    font-family: var(--serif);
-    font-style: italic;
-    font-weight: 300;
-    font-size: 1.85rem;
-    line-height: 1;
-    color: var(--accent);
-    font-variation-settings: 'opsz' 144;
-  }
-
-  .mark__name {
-    font-family: var(--serif);
-    font-weight: 500;
+  .brand__name {
+    font-weight: 600;
     font-size: 1.05rem;
-    letter-spacing: 0.02em;
+    letter-spacing: -0.02em;
   }
 
-  .mark__sep {
-    font-family: var(--serif);
-    color: var(--ink-mute);
-    font-style: italic;
-  }
-
-  .mark__sub {
+  .brand__badge {
     font-family: var(--mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--ink-mute);
+    font-size: 0.65rem;
+    color: var(--fg-mute);
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--surface-2);
+    border: 1px solid var(--line-2);
   }
 
-  .masthead__nav {
-    display: flex;
-    gap: 28px;
-    justify-content: center;
-  }
-
-  .masthead__nav a {
-    font-family: var(--mono);
-    font-size: 0.74rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--ink-mute);
-    padding: 6px 0;
-    border-bottom: 1px solid transparent;
-    transition: color 160ms ease, border-color 160ms ease;
-  }
-
-  .masthead__nav a:hover {
-    color: var(--ink);
-    text-decoration: none;
-    border-bottom-color: var(--rule-strong);
-  }
-
-  .masthead__nav a.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-  }
-
-  .num {
-    font-style: italic;
-    color: var(--ink-mute);
-    margin-right: 4px;
-  }
-
-  .masthead__account {
+  .nav {
     display: flex;
     align-items: center;
-    gap: 18px;
-    justify-content: flex-end;
+    gap: 4px;
+    padding: 4px;
+    background: var(--surface);
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-pill);
   }
 
-  .account {
+  .nav a {
+    padding: 7px 16px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--fg-mute);
+    border-radius: var(--r-pill);
+    transition: all 200ms var(--ease);
+  }
+
+  .nav a:hover {
+    color: var(--fg);
+    background: var(--surface-2);
+  }
+
+  .nav a.active {
+    color: var(--bg);
+    background: var(--volt);
+  }
+  .nav a.active:hover { background: var(--volt-2); color: var(--bg); }
+
+  .topbar__right {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    position: relative;
+  }
+
+  .user {
     display: inline-flex;
     align-items: center;
     gap: 10px;
+    padding: 4px 12px 4px 4px;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    cursor: pointer;
+    transition: border-color 200ms var(--ease), background 200ms var(--ease);
   }
 
-  .account__name {
-    font-family: var(--mono);
-    font-size: 0.78rem;
-    letter-spacing: 0.04em;
+  .user:hover {
+    border-color: var(--line-3);
+    background: var(--surface-2);
   }
 
-  .account__avatar {
-    width: 32px;
-    height: 32px;
+  .user__avatar {
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
-    background: var(--ink);
-    color: var(--paper);
+    background: linear-gradient(135deg, var(--volt) 0%, var(--plum) 100%);
+    color: var(--bg);
     overflow: hidden;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-family: var(--serif);
-    font-style: italic;
-    font-size: 0.95rem;
-    border: 1px solid var(--rule-strong);
+    font-weight: 600;
+    font-size: 0.78rem;
+  }
+  .user__avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+  .user__name {
+    font-size: 0.85rem;
+    font-weight: 500;
   }
 
-  .account__avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .lnk {
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--ink-mute);
-    cursor: pointer;
-    transition: color 160ms ease;
-  }
-
-  .lnk:hover { color: var(--accent); }
-  .lnk--strong { color: var(--ink); }
-
-  .masthead__rule {
-    margin-top: 18px;
+  .menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 180px;
+    padding: 6px;
+    background: var(--surface);
+    border: 1px solid var(--line-3);
+    border-radius: var(--r-2);
+    box-shadow: var(--shadow-1);
     display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 16px;
-    padding-bottom: 18px;
-    border-bottom: 1px solid var(--rule-strong);
+    gap: 2px;
+    z-index: 100;
   }
 
-  .masthead__date,
-  .masthead__edition {
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--ink-mute);
+  .menu__item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 0.88rem;
+    color: var(--fg-2);
+    border-radius: var(--r-1);
+    transition: background 160ms var(--ease), color 160ms var(--ease);
   }
-
-  .masthead__rule-line {
+  .menu__item:hover {
+    background: var(--surface-2);
+    color: var(--fg);
+  }
+  .menu__item--del:hover { color: var(--rose); }
+  .menu__divider {
     height: 1px;
-    background: var(--rule-strong);
+    background: var(--line-2);
+    margin: 4px 0;
   }
 
   .main {
     flex: 1;
-    padding: 56px clamp(20px, 4vw, 56px);
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 56px clamp(20px, 4vw, 40px);
   }
 
   .foot {
-    padding: 32px clamp(20px, 4vw, 56px);
-    border-top: 1px solid var(--rule-strong);
+    border-top: 1px solid var(--line);
+    padding: 24px clamp(20px, 4vw, 40px);
     margin-top: 64px;
   }
 
   .foot__inner {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 24px;
-    align-items: start;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--fg-mute);
   }
 
-  .foot__col p {
-    margin: 6px 0 0;
-    font-family: var(--serif);
-    font-style: italic;
-    color: var(--ink-mute);
+  .foot__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
   }
 
-  .foot__col--mid { text-align: center; }
-  .foot__col--end { text-align: right; }
+  .foot__meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .foot__dot { opacity: 0.5; }
 
-  @media (max-width: 800px) {
-    .masthead__bar {
-      grid-template-columns: 1fr 1fr;
-    }
-    .masthead__nav {
+  @media (max-width: 760px) {
+    .topbar__inner { grid-template-columns: auto 1fr; gap: 12px; }
+    .nav {
       grid-column: 1 / -1;
       order: 3;
-      justify-content: flex-start;
-      flex-wrap: wrap;
+      justify-content: center;
     }
-    .foot__inner { grid-template-columns: 1fr; }
-    .foot__col--mid, .foot__col--end { text-align: left; }
+    .nav a { padding: 6px 12px; font-size: 0.8rem; }
+    .user__name { display: none; }
+    .brand__badge { display: none; }
   }
 </style>

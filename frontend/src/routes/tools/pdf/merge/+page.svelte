@@ -12,7 +12,7 @@
     e.preventDefault();
     if (busy) return;
     if (files.length < 2) {
-      error = 'Pick at least two PDF files to bind.';
+      error = 'Pick at least two PDF files to merge.';
       return;
     }
     error = '';
@@ -31,12 +31,11 @@
   }
 </script>
 
-<svelte:head><title>Merge — Atelier Tools</title></svelte:head>
+<svelte:head><title>Merge PDFs — Voltage</title></svelte:head>
 
-<ToolShell num="01" title="Merge.">
+<ToolShell eyebrow="Tools / PDF" title="Merge PDFs.">
   {#snippet lede()}
-    Compose two or more PDFs into a single bound volume. Drag to set the order
-    &mdash; the first sheet is the cover.
+    Combine two or more PDFs into one bound document. Drag to reorder — the first sheet becomes the cover.
   {/snippet}
 
   <form onsubmit={onSubmit} novalidate>
@@ -44,51 +43,64 @@
       bind:files
       multiple
       accept="application/pdf"
-      label="Lay your PDFs here"
-      sublabel="— at least two, in reading order —"
+      label="Drop PDF files here"
+      sublabel="or click to browse · 2 or more"
     />
 
     {#if error}
-      <p class="notice notice--err" style="margin-top: 18px;">{error}</p>
+      <p class="notice notice--err" style="margin-top: 16px;">{error}</p>
+    {/if}
+
+    {#if lastFilename}
+      <p class="notice notice--ok" style="margin-top: 16px;">
+        Generated {lastFilename} — download started automatically.
+      </p>
     {/if}
 
     <div class="actions">
-      <button class="btn btn--accent" type="submit" disabled={busy || files.length < 2}>
-        {busy ? 'Binding…' : 'Bind into one'}
-        <span aria-hidden="true">&rarr;</span>
+      <button class="btn" type="submit" disabled={busy || files.length < 2}>
+        {#if busy}
+          <span class="spinner"></span>
+          Merging
+        {:else}
+          Merge {files.length} files
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+        {/if}
       </button>
-      {#if lastFilename}
-        <span class="lnk lnk--ok">✓ Issued {lastFilename}</span>
-      {/if}
+      <span class="meta">{files.length} {files.length === 1 ? 'file' : 'files'} ready</span>
     </div>
   </form>
 
   {#snippet side()}
-    <p>
-      Pages are taken in order, top to bottom. Use the arrows on each entry to
-      rearrange. Files leave your browser only briefly, traveling to the
-      workshop and returning bound.
-    </p>
-    <p style="margin-top: 14px;">
-      <span class="eyebrow">Constraints</span><br />
-      Up to 50 MB per file. Only application/pdf accepted.
+    <h3 style="font-size: 0.92rem; font-weight: 500; margin-bottom: 10px; color: var(--fg);">How it works</h3>
+    <p style="margin: 0 0 12px;">Pages are taken in order, top to bottom. Use the arrows on each entry to rearrange.</p>
+    <p style="margin: 0;" class="hint">
+      <strong style="color: var(--fg);">Limits</strong> — up to 99 MB per file, application/pdf only.
     </p>
   {/snippet}
 </ToolShell>
 
 <style>
   .actions {
-    margin-top: 28px;
+    margin-top: 24px;
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 16px;
     flex-wrap: wrap;
   }
-  .lnk {
+  .meta {
     font-family: var(--mono);
-    font-size: 0.74rem;
-    letter-spacing: 0.1em;
-    color: var(--ink-mute);
+    font-size: 0.78rem;
+    color: var(--fg-mute);
   }
-  .lnk--ok { color: var(--good); }
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #0a0a0c40;
+    border-top-color: var(--bg);
+    animation: spin 700ms linear infinite;
+  }
+  .hint { color: var(--fg-mute); font-size: 0.86rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>

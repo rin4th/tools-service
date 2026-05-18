@@ -24,19 +24,18 @@
       lastFilename = filename;
       downloadBlob(blob, filename);
     } catch (err) {
-      error = err.message || 'Failed to set images';
+      error = err.message || 'Failed to convert';
     } finally {
       busy = false;
     }
   }
 </script>
 
-<svelte:head><title>Images — Atelier Tools</title></svelte:head>
+<svelte:head><title>Images → PDF — Voltage</title></svelte:head>
 
-<ToolShell num="03" title="Set images.">
+<ToolShell eyebrow="Tools / PDF" title="Images → PDF.">
   {#snippet lede()}
-    Set photographs and stills onto crisp PDF pages, one per leaf.
-    JPEG, PNG, and WebP are welcomed.
+    Stitch JPEGs, PNGs, or WebPs into a single PDF — one image per page, in the order you set.
   {/snippet}
 
   <form onsubmit={onSubmit} novalidate>
@@ -44,50 +43,61 @@
       bind:files
       multiple
       accept="image/jpeg,image/png,image/webp"
-      label="Lay your images here"
-      sublabel="— in the order they should appear —"
+      label="Drop image files here"
+      sublabel="JPEG · PNG · WebP"
     />
 
     {#if error}
-      <p class="notice notice--err" style="margin-top: 18px;">{error}</p>
+      <p class="notice notice--err" style="margin-top: 16px;">{error}</p>
+    {/if}
+    {#if lastFilename}
+      <p class="notice notice--ok" style="margin-top: 16px;">
+        Generated {lastFilename} — download started automatically.
+      </p>
     {/if}
 
     <div class="actions">
-      <button class="btn btn--accent" type="submit" disabled={busy || !files.length}>
-        {busy ? 'Setting…' : 'Set into PDF'}
-        <span aria-hidden="true">&rarr;</span>
+      <button class="btn" type="submit" disabled={busy || !files.length}>
+        {#if busy}
+          <span class="spinner"></span>
+          Converting
+        {:else}
+          Convert {files.length} {files.length === 1 ? 'image' : 'images'}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+        {/if}
       </button>
-      {#if lastFilename}
-        <span class="lnk lnk--ok">✓ Issued {lastFilename}</span>
-      {/if}
+      <span class="meta">{files.length} {files.length === 1 ? 'image' : 'images'} ready</span>
     </div>
   </form>
 
   {#snippet side()}
-    <p>
-      Each image becomes one page. Order matters &mdash; reorder using the
-      arrows on each entry. The aspect of the page follows the image.
-    </p>
-    <p style="margin-top: 14px;">
-      <span class="eyebrow">Accepted</span><br />
-      JPEG &middot; PNG &middot; WebP
-    </p>
+    <h3 style="font-size: 0.92rem; font-weight: 500; margin-bottom: 10px; color: var(--fg);">How it works</h3>
+    <p style="margin: 0 0 12px;">Each image becomes one page. Reorder using the arrows on each entry. The page aspect follows the image.</p>
+    <p class="hint" style="margin: 0;"><strong style="color: var(--fg);">Accepted</strong> — JPEG, PNG, WebP up to 99 MB each.</p>
   {/snippet}
 </ToolShell>
 
 <style>
   .actions {
-    margin-top: 28px;
+    margin-top: 24px;
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 16px;
     flex-wrap: wrap;
   }
-  .lnk {
+  .meta {
     font-family: var(--mono);
-    font-size: 0.74rem;
-    letter-spacing: 0.1em;
-    color: var(--ink-mute);
+    font-size: 0.78rem;
+    color: var(--fg-mute);
   }
-  .lnk--ok { color: var(--good); }
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #0a0a0c40;
+    border-top-color: var(--bg);
+    animation: spin 700ms linear infinite;
+  }
+  .hint { color: var(--fg-mute); font-size: 0.86rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
