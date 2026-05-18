@@ -26,6 +26,7 @@ services:
       JWT_ALGORITHM: ${JWT_ALGORITHM}
       JWT_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES}
       CORS_ORIGINS: ${CORS_ORIGINS}
+      MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-99}
     ports:
       - "${BACKEND_PORT}:8000"
     volumes:
@@ -42,6 +43,7 @@ services:
       BACKEND_URL: http://backend:8000
       PORT: 3000
       HOST: 0.0.0.0
+      BODY_SIZE_LIMIT: ${BODY_SIZE_LIMIT:-104857600}
     ports:
       - "${FRONTEND_PORT}:3000"
     depends_on:

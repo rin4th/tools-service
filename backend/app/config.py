@@ -9,7 +9,6 @@ UPLOAD_DIR = STORAGE_DIR / "uploads"
 OUTPUT_DIR = STORAGE_DIR / "outputs"
 AVATAR_DIR = STORAGE_DIR / "avatars"
 
-MAX_FILE_SIZE = 50 * 1024 * 1024
 MAX_AVATAR_SIZE = 2 * 1024 * 1024
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
 ALLOWED_PDF_TYPES = {"application/pdf"}
@@ -28,11 +27,18 @@ class Settings(BaseSettings):
 
     cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 
+    max_file_size_mb: int = 99
+
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", case_sensitive=False)
 
     @property
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
+    @property
+    def max_file_size(self) -> int:
+        return self.max_file_size_mb * 1024 * 1024
+
 
 settings = Settings()
+MAX_FILE_SIZE = settings.max_file_size
